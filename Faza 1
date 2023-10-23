@@ -1,0 +1,272 @@
+
+// Domeniul ales este hypermarket
+#include<iostream>
+using namespace std;
+
+class Casier
+{
+public:
+	static int procent_reducere;
+	const int id;
+	char* nume;
+	int varsta;
+	int salariu;
+	int vechime;
+	bool full_time;
+	
+	Casier():id(3)
+	{
+		this->nume = new char[strlen("Dumitru") + 1];
+		strcpy_s(nume, strlen("Dumitru") + 1, "Dumitru");
+		this->varsta = 30;
+		this->salariu = 2500;
+		this->vechime = 3;
+		this->full_time = true;
+	}
+
+
+
+	Casier(int varsta, int salariu) :id(4)
+	{
+		this->nume = new char[strlen("Rares") + 1];
+		strcpy_s(nume, strlen("Rares") + 1, "Rares");
+		this->varsta = varsta;
+		this->salariu = salariu;
+		this->vechime = 5;
+		this->full_time = true;
+	}
+
+
+
+	Casier(char* nume, int salariu, int vechime) : id(5)
+	{
+		this->nume = new char[strlen(nume) + 1];
+		this->nume =  nume;
+		this->varsta = 24;
+		this->salariu = salariu;
+		this->vechime = vechime;
+		this->full_time = false;
+	}
+
+	~Casier() {
+		if (nume != NULL)
+			delete[]this->nume;
+	}
+
+	void afisare()
+	{
+		cout << "Casierul are numele " << nume << " , are id-ul:"<<id<< " ,varsta de " << varsta << " ani, salariul de " << salariu << " lei si o vechime de " << vechime << " ani. Are un procent de reducere de " << procent_reducere<<"% .";
+		if (full_time == true)
+			cout << " Acesta este angajat full-time" << endl;
+		else
+			cout << " Acesta este angajat part-time" << endl;
+
+	}
+	static void modifica_reducerea(int reducere_noua)
+	{
+		procent_reducere = reducere_noua;
+	}
+};
+int Casier::procent_reducere = 10;
+
+
+class Patiserie
+{
+public:
+	static int tva;
+	const int cod_produs;
+	string nume;
+	float pret;
+	float greutate;
+	string* ingrediente;
+	int nr_ingrediente;
+
+
+	Patiserie():cod_produs(14)
+	{
+		this->nume = "Merdenea";
+		this->pret = 3.5;
+		this->greutate = 0.25;
+		this->nr_ingrediente = 4;
+		this->ingrediente = new string[4];
+		this->ingrediente[0] = "sare";
+		this->ingrediente[1] = "unt";
+		this->ingrediente[2] = "foietaj";
+		this->ingrediente[3] = "indulcitori";
+
+	}
+
+
+
+	Patiserie(string nume, float pret, float greutate) :cod_produs(20)
+	{
+		this->nume = nume;
+		this->pret = pret;
+		this->greutate = greutate;
+		this->nr_ingrediente = 2;
+		this->ingrediente = new string[2];
+		this->ingrediente[0] = "foietaj";
+		this->ingrediente[1] = "unt";
+	}
+	
+
+
+	Patiserie(int nr_ingrediente,string* ingrediente) :cod_produs(10)
+	{
+		int i;
+		this->nume = "Bagheta";
+		this->pret = 5.2;
+		this->greutate = 0.5;
+		this->nr_ingrediente = nr_ingrediente;
+		this->ingrediente = new string[nr_ingrediente];
+		for (i = 0; i < nr_ingrediente; i++)
+			this->ingrediente[i] = ingrediente[i];
+
+	
+	}
+
+
+	~Patiserie() {
+		if (ingrediente != NULL)
+			delete[]this->ingrediente;
+	}
+
+	
+	
+	static void crestere_tva()
+	{
+		tva++;
+	}
+	
+	
+	void afisare()
+	{
+		int i;
+		cout << "Produsul de patiserie este " << nume << " ,are codul "<<cod_produs<<" ,are un pret de " << pret <<" lei "<< ",o greutate de " << greutate <<" kg "<< " si " << nr_ingrediente <<" ingrediente. Ingredientele sunt: ";
+		for (i = 0; i < nr_ingrediente; i++)
+			cout << ingrediente[i]<<" ";
+		cout << ".Tva-ul aplicat pentru acest produs este de: " << tva<<"%."<<endl;
+	}
+};
+
+int Patiserie::tva = 9;
+
+
+
+class Furnizori
+{
+public:
+	static int nr_furnizori;
+	const int id;
+	string nume;
+	char* oras;
+	string* produs;
+	int nr_produse;
+	int durata_contract;
+
+
+	Furnizori(): id(26)
+	{
+		this->nr_furnizori++;
+		this->nume = "Omega";
+		this->oras = new char[strlen("Buzau") + 1];
+		strcpy_s(oras, strlen("Buzau") + 1, "Buzau");
+		this->nr_produse = 3;
+		this->produs = new string[nr_produse];
+		this->produs[0] = "biscuiti";
+		this->produs[1] = "ciocolata";
+		this->produs[2] = "caramele";
+		this->durata_contract = 1;
+	}
+
+
+
+	Furnizori(string nume, char* oras):id(15)
+	{
+		this->nr_furnizori++;
+		this->nume = nume;
+		this->oras = new char[strlen(oras)+1];
+		this->oras = oras;
+		this->nr_produse = 2;
+		this->produs = new string[nr_produse];
+		this->produs[0] = "pesmet";
+		this->produs[1] = "faina";
+		this->durata_contract = 2;
+	}
+
+
+
+	Furnizori(string* produs) :id(33)
+	{
+		this->nr_furnizori++;
+		this->nume = "Fructo";
+		this->oras = new char[strlen("Arges") + 1];
+		strcpy_s(oras, strlen("Arges") + 1, "Arges");
+		this->nr_produse = 4;
+		this->produs = new string[nr_produse];
+		for (int i = 0; i < nr_produse; i++)
+			this->produs[i] = produs[i];
+		this->durata_contract = 3;
+	}
+
+	~Furnizori() {
+		if (oras != NULL)
+			delete[]this->oras;
+		if (produs != NULL)
+			delete[]this->produs;
+	}
+
+	static void afiseaza_nrFurnizori()
+	{
+		cout << "Numarul total de furnizori este: " << nr_furnizori << endl;
+	}
+	void afisare()
+	{
+		cout << "Furnizorul " << nume << " are id-ul : " << id << " , este din orasul " << oras << ", livreaza " << nr_produse << " produse si are un contract cu durata de " << durata_contract << " ani. Produsele furnizate sunt:";
+		for (int i = 0; i < nr_produse; i++)
+			cout << produs[i] << " ";
+		cout << ".Numarul total de furnizori este: " << nr_furnizori << endl;
+		
+	}
+};
+int Furnizori::nr_furnizori = 0;
+
+
+
+
+void main()
+{
+	Casier casier1;
+	casier1.afisare();
+	Casier casier2(23, 2320);
+	casier2.afisare();
+	char* nume=new char[strlen("Ioana")+1];
+	strcpy_s(nume, strlen("Ioana") + 1, "Ioana");
+	Casier casier3(nume, 2400, 3);
+	casier3.afisare();
+
+	Patiserie patiserie1;
+	patiserie1.afisare();
+	Patiserie patiserie2("Covrig", 3.2, 0.15);
+	patiserie2.afisare();
+	string* ingrediente = new string[2];
+	ingrediente[0] = "Sare";
+	ingrediente[1] = "Unt";
+	Patiserie patiserie3(2, ingrediente);
+	patiserie3.afisare();
+
+	Furnizori furnizor1;
+	furnizor1.afisare();
+	char* oras = new char[strlen("Vaslui") + 1];
+	strcpy_s(oras, strlen("Vaslui") + 1, "Vaslui");
+	Furnizori furnizor2("Pano", oras);
+	furnizor2.afisare();
+	string* produs=new string[4];
+	produs[0] = "mere";
+	produs[1] = "pere";
+	produs[2] = "prune";
+	produs[3] = "capsuni";
+	Furnizori furnizor3(produs);
+	furnizor3.afisare();
+
+}
