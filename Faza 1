@@ -120,6 +120,42 @@ public:
 	{
 		Casier::procent_reducere = procent_reducere;
 	}
+	const Casier& operator=(const Casier& c)
+	{
+		if (this != &c)
+		{
+			if (this->nume != NULL)
+				delete[]this->nume;
+			this->nume = new char[strlen(c.nume) + 1];
+			strcpy_s(this->nume, strlen(c.nume) + 1, c.nume);
+			this->varsta = c.varsta;
+			this->salariu = c.salariu;
+			this->vechime = c.vechime;
+			this->full_time = c.full_time;
+		}
+		return *this;
+	}
+	const Casier operator+(const Casier& c) const
+	{
+		Casier aux=*this;
+		aux.salariu = this->salariu + c.salariu;
+		return aux;
+		
+	}
+	Casier operator++()
+	{
+		
+		this->vechime++;
+		return *this;
+
+	}
+
+	bool operator<(const Casier& c) const
+	{
+		return this->salariu < c.salariu;
+	}
+
+
 
 	void afisare()
 	{
@@ -157,7 +193,6 @@ private:
 	string* ingrediente;
 	int nr_ingrediente;
 public:
-	
 	Patiserie(const Patiserie& p) :cod_produs(p.cod_produs)
 	{
 		int i;
@@ -287,6 +322,33 @@ public:
 	{
 		return this->cod_produs;
 	}
+	const Patiserie& operator=(const Patiserie& p)
+	{
+		if (this != &p)
+		{
+			this->nume = p.nume;
+			this->pret = p.pret;
+			this->greutate = p.greutate;
+			this->nr_ingrediente = p.nr_ingrediente;
+			if (this->ingrediente != NULL)
+				delete[]this->ingrediente;
+			this->ingrediente = new string[this->nr_ingrediente];
+			for (int i = 0; i < this->nr_ingrediente; i++)
+				this->ingrediente[i] = p.ingrediente[i];
+		}
+		return *this;
+	}
+	const Patiserie& operator-=(int reducere)
+	{
+		this->pret=this->pret-(reducere*this->pret)/100;
+		return *this;
+			
+	}
+	string& operator[](int index)
+	{
+		if (index > 0 && index < this->nr_ingrediente)
+			return this->ingrediente[index];
+	}
 	
 	void afisare()
 	{
@@ -297,7 +359,29 @@ public:
 		cout << ".Tva-ul aplicat pentru acest produs este de: " << tva<<"%."<<endl;
 	}
 	friend void Cauta_furnizor(Furnizori f,Patiserie p, string ingredient);
+	friend istream& operator>>(istream& ist, Patiserie& p);
 };
+istream& operator>>(istream& ist, Patiserie& p)
+{
+	cout << "Numele produsului este: ";
+	ist >> p.nume;
+	cout << "Pretul produsului este: ";
+	ist >> p.pret;
+	cout << "Greutatea produsului este: ";
+	ist >> p.greutate;
+	cout << "Numarul de ingrediente necesare fabricarii produsului este: ";
+	ist >> p.nr_ingrediente;
+	int i;
+	if (p.ingrediente != NULL)
+		delete[]p.ingrediente;
+	p.ingrediente = new string[p.nr_ingrediente];
+	for (i = 0; i < p.nr_ingrediente; i++)
+	{
+		cout << "Ingredientul " << i + 1 << " este :";
+		ist >> p.ingrediente[i];
+	}
+	return ist;
+}
 
 int Patiserie::tva = 9;
 
@@ -315,7 +399,7 @@ private:
 	int durata_contract;
 public:
 	
-	Furnizori(Furnizori& f) :id(f.id)
+	Furnizori(const Furnizori& f) :id(f.id)
 	{
 		int i;
 		this->nume = f.nume;
@@ -448,6 +532,44 @@ public:
 		this->durata_contract = durata_contract;
 	}
 
+	const Furnizori& operator=(const Furnizori &f)
+	{
+		if (this != &f)
+		{
+			this->nume = f.nume;
+			this->nr_produse = f.nr_produse;
+			if (this->oras != NULL)
+				delete[]this->oras;
+			this->oras = new char[strlen(f.oras) + 1];
+			strcpy_s(this->oras, strlen(f.oras) + 1, f.oras);
+			if (this->produs != NULL)
+				delete[]this->produs;
+			this->produs = new string[this->nr_produse];
+			for (int i = 0; i < this->nr_produse; i++)
+				this->produs[i] = f.produs[i];
+			this->durata_contract = f.durata_contract;
+		}
+		return *this;
+	}
+	 const Furnizori operator+(const Furnizori& f) const
+	{
+		Furnizori aux = *this;
+		aux.nr_produse = this->nr_produse + f.nr_produse;
+		int i;
+		if (aux.produs != NULL)
+			delete[]aux.produs;
+		aux.produs = new string[aux.nr_produse];
+		for (i = 0; i < this->nr_produse; i++)
+			aux.produs[i] = this->produs[i];
+		for (i=this->nr_produse; i < aux.nr_produse; i++)
+			aux.produs[i] = f.produs[i-this->nr_produse];
+		aux.durata_contract = this->durata_contract + f.durata_contract;
+		return aux;
+	}
+	 bool operator>(const Furnizori& f)
+	 {
+		 return this->durata_contract > f.durata_contract;
+	 }
 	void afisare()
 	{
 		cout << "Furnizorul " << nume << " are id-ul : " << id << " , este din orasul " << oras << ", livreaza " << nr_produse << " produse si are un contract cu durata de " << durata_contract << " ani. Produsele furnizate sunt:";
@@ -457,7 +579,20 @@ public:
 		
 	}
 	friend void Cauta_furnizor(Furnizori f, Patiserie p, string ingredient);
+	friend ostream& operator<<(ostream& ost, Furnizori f);
 };
+
+ostream& operator<<(ostream& ost, Furnizori f)
+{
+	ost << "Numarul de furnizori este: " << f.nr_furnizori << ", id-ul furnizorului este: " << f.id << ", numele furnizorului este: " << f.nume << " ,iar numele orasului este: " << f.oras;
+	
+	ost << ". Numarul de produse este: " << f.nr_produse<<" .";
+	for (int i = 0; i < f.nr_produse; i++)
+		ost << " Produsul " << i + 1 << " adus de furnizorul " << f.nume << " este " << f.produs[i]<<" .";
+	ost << " Contractul are o durata de " << f.durata_contract<<" ani.";
+	return ost;
+
+}
 int Furnizori::nr_furnizori = 0;
 
 void Cauta_furnizor(Furnizori f, Patiserie p, string ingredient)
@@ -476,9 +611,9 @@ void Cauta_furnizor(Furnizori f, Patiserie p, string ingredient)
 			if (ingredient == f.produs[i])
 				ok = 1;
 		if (ok == 1)
-			cout << "Ingredientul este procurat de la furnizorul " << f.nume;
+			cout << "Ingredientul este procurat de la furnizorul " << f.nume<<endl;
 		else
-			cout << "Ingredientul nu este procurat de la furnizorul " << f.nume;
+			cout << "Ingredientul nu este procurat de la furnizorul " << f.nume<<endl;
 	}
 
 	
@@ -491,7 +626,7 @@ void main()
 	casier1.afisare();
 	Casier casier2(23, 2320);
 	casier2.afisare();
-	char* nume=new char[strlen("Ioana")+1];
+	char* nume = new char[strlen("Ioana") + 1];
 	strcpy_s(nume, strlen("Ioana") + 1, "Ioana");
 	Casier casier3(nume, 2400, 3);
 	casier3.afisare();
@@ -571,4 +706,38 @@ void main()
 	delete[]oras1;
 	delete[]vector_produse;
 
+	Furnizori furnizor4;
+	furnizor4 = furnizor3;
+	cout << furnizor4<<endl;
+	Furnizori furnizor5;
+	furnizor5 = furnizor2 + furnizor3;
+	cout << furnizor5<<endl;
+	if (furnizor1 > furnizor2)
+		cout << "Furnizorul " << furnizor1.getNume() << " are durata contractului mai mare decat cel al lui  " << furnizor2.getNume()<<endl;
+	else
+		cout << "Furnizorul " << furnizor2.getNume() << "  are durata contractului mai mare decat cel al lui " << furnizor1.getNume()<<endl;
+
+
+	Patiserie patiserie4;
+	patiserie4 = patiserie2;
+	patiserie4.afisare();
+	Patiserie patiserie5;
+	cin >> patiserie5;
+	patiserie2-= 10;
+	patiserie2.afisare();
+	cout << patiserie1[2]<<endl;
+
+
+	Casier casier4;
+	casier4 = casier1;
+	casier4.afisare();
+	Casier casier5;
+	casier5 = casier2 + casier3;
+	casier5.afisare();
+	casier3= ++casier1;
+	casier3.afisare();
+	if (casier2 < casier3)
+		cout << "Casierul " << casier3.getNume() << " are salariul mai mare decat " << casier2.getNume()<<" .";
+	else
+		cout << "Casierul " << casier2.getNume() << " are salariul mai mare decat " << casier3.getNume()<<" .";
 }
