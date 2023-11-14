@@ -171,9 +171,39 @@ public:
 		procent_reducere = reducere_noua;
 	}
 	friend void Crestere_salariu(Casier& c, int procent,int vechime);
+	friend istream& operator>>(istream& is, Casier& c);
+	friend ostream& operator<<(ostream& ost, Casier& c);
 };
 int Casier::procent_reducere = 10;
 
+istream& operator>>(istream& is, Casier& c)
+{
+	char nume[100];
+	cout << "Numele casierului este: ";
+	is >> nume;
+	if (c.nume != NULL)
+		delete[]c.nume;
+	c.nume = new char[strlen(nume) + 1];
+	strcpy_s(c.nume, strlen(nume) + 1, nume);
+	cout << "Varsta acestuia este: ";
+	is >> c.varsta;
+	cout << "Salariul lui este de (lei): ";
+	is >> c.salariu;
+	cout << "Are o vechime de (ani): ";
+	is >> c.vechime;
+	cout << "FULL-time/part-time(1-full-time,0-part-time)";
+	is >> c.full_time;
+	return is;
+}
+ostream& operator<<(ostream& ost, Casier& c)
+{
+	ost << "Casierul are numele " << c.nume << ", are id-ul: " << c.id<<" ,procentul de reducere: "<<c.procent_reducere<<", varsta acestuia este de " << c.varsta << " ani, salariul este de " << c.salariu << " lei, iar vechimea angajatului este de : " << c.vechime << " ani.";
+	if (c.full_time == true)
+		ost << "Casierul este angajat full-time";
+	else
+		ost << "Casierul este angajat part-time";
+	return ost;
+}
 void Crestere_salariu(Casier& c, int procent,int vechime)
 {
 	int salariu_vechi=c.salariu;
@@ -360,6 +390,7 @@ public:
 	}
 	friend void Cauta_furnizor(Furnizori f,Patiserie p, string ingredient);
 	friend istream& operator>>(istream& ist, Patiserie& p);
+	friend ostream& operator<<(ostream& os, Patiserie& p);
 };
 istream& operator>>(istream& ist, Patiserie& p)
 {
@@ -381,6 +412,16 @@ istream& operator>>(istream& ist, Patiserie& p)
 		ist >> p.ingrediente[i];
 	}
 	return ist;
+}
+
+ostream& operator<<(ostream& os, Patiserie& p)
+{
+	os << "Numele produsului este: " << p.nume << " ,pretul acestuia este: " << p.pret << " lei, greutatea este de " << p.greutate << " kg, numarul de ingrediente este: " << p.nr_ingrediente<<" ,id-ul este "<<p.cod_produs<<" iar tva-ul "<<p.tva<<"."<<endl;
+	for (int i = 0; i < p.nr_ingrediente; i++)
+	{
+		os << " Ingredientul " << i + 1 << " este: " << p.ingrediente[i]<<endl;
+	}
+	return os;
 }
 
 int Patiserie::tva = 9;
@@ -580,16 +621,44 @@ public:
 	}
 	friend void Cauta_furnizor(Furnizori f, Patiserie p, string ingredient);
 	friend ostream& operator<<(ostream& ost, Furnizori f);
-};
+	friend istream& operator>>(istream& ist, Furnizori& f);
 
+};
+istream& operator>>(istream& ist, Furnizori& f)
+{
+	char oras[100];
+	cout << "Furnizorul are numele: ";
+	ist >> f.nume;
+	cout << "Acesta este din orasul";
+	ist >> oras;
+	if (f.oras != NULL)
+		delete[]f.oras;
+	f.oras = new char[strlen(oras) + 1];
+	strcpy_s(f.oras, strlen(oras) + 1, oras);
+	cout << "Numarul de produse furnizate este: ";
+	ist >> f.nr_produse;
+	if (f.produs != NULL)
+		delete[]f.produs;
+	f.produs = new string[f.nr_produse];
+	for (int i = 0; i < f.nr_produse; i++)
+	{
+		cout << "Produsul " << i + 1 << " este: ";
+		ist >> f.produs[i];
+	}
+	cout << "Contractul are o durata de (ani) ";
+	ist >> f.durata_contract;
+	return ist;
+
+
+}
 ostream& operator<<(ostream& ost, Furnizori f)
 {
 	ost << "Numarul de furnizori este: " << f.nr_furnizori << ", id-ul furnizorului este: " << f.id << ", numele furnizorului este: " << f.nume << " ,iar numele orasului este: " << f.oras;
 	
-	ost << ". Numarul de produse este: " << f.nr_produse<<" .";
+	ost << ". Numarul de produse este: " << f.nr_produse<<" ."<<endl;
 	for (int i = 0; i < f.nr_produse; i++)
-		ost << " Produsul " << i + 1 << " adus de furnizorul " << f.nume << " este " << f.produs[i]<<" .";
-	ost << " Contractul are o durata de " << f.durata_contract<<" ani.";
+		ost << " Produsul " << i + 1 << " adus de furnizorul " << f.nume << " este " << f.produs[i]<<" ."<<endl;
+	ost << " Contractul are o durata de " << f.durata_contract<<" ani."<<endl;
 	return ost;
 
 }
@@ -740,4 +809,42 @@ void main()
 		cout << "Casierul " << casier3.getNume() << " are salariul mai mare decat " << casier2.getNume()<<" .";
 	else
 		cout << "Casierul " << casier2.getNume() << " are salariul mai mare decat " << casier3.getNume()<<" .";
+
+	Patiserie* VectorPatiserie = new Patiserie[2];
+	for (int i = 0; i < 2; i++)
+		cin >> VectorPatiserie[i];
+	for (int i = 0; i < 2; i++)
+		cout << VectorPatiserie[i];
+
+	Patiserie** MatricePatiserie = new Patiserie * [3];
+	for (int i = 0; i < 3; i++)
+		MatricePatiserie[i] = new Patiserie[2];
+	for (int i = 0; i < 3; i++)
+		for (int j = 0; j < 2; j++)
+			cin >> MatricePatiserie[i][j];
+	for (int i = 0; i < 3; i++)
+		for (int j = 0; j < 2; j++)
+			cout << MatricePatiserie[i][j];
+	
+	Furnizori* VectorFurnizori = new Furnizori[3];
+	for (int i = 0; i < 3; i++)
+		cin >> VectorFurnizori[i];
+	for (int i = 0; i < 3; i++)
+		cout << VectorFurnizori[i];
+
+		Casier* VectorCasieri = new Casier[2];
+		for (int i = 0; i < 2; i++)
+			cin >> VectorCasieri[i];
+		for (int i = 0; i < 2; i++)
+			cout << VectorCasieri[i]<<endl;
+
+	delete[]VectorPatiserie;
+	for(int i=0;i<3;i++)
+	delete[]MatricePatiserie[i];
+	delete[]MatricePatiserie;
+	delete[]VectorFurnizori;
+	delete[]VectorCasieri;
+
+	
+
 }
