@@ -4,6 +4,8 @@
 using namespace std;
 
 class Furnizori;
+class Client;
+
 class Casier
 {
 private:
@@ -172,7 +174,8 @@ public:
 	}
 	friend void Crestere_salariu(Casier& c, int procent,int vechime);
 	friend istream& operator>>(istream& is, Casier& c);
-	friend ostream& operator<<(ostream& ost, Casier& c);
+	friend ostream& operator<<(ostream& ost, const Casier& c);
+	friend Client;
 };
 int Casier::procent_reducere = 10;
 
@@ -195,7 +198,7 @@ istream& operator>>(istream& is, Casier& c)
 	is >> c.full_time;
 	return is;
 }
-ostream& operator<<(ostream& ost, Casier& c)
+ostream& operator<<(ostream& ost, const Casier& c)
 {
 	ost << "Casierul are numele " << c.nume << ", are id-ul: " << c.id<<" ,procentul de reducere: "<<c.procent_reducere<<", varsta acestuia este de " << c.varsta << " ani, salariul este de " << c.salariu << " lei, iar vechimea angajatului este de : " << c.vechime << " ani.";
 	if (c.full_time == true)
@@ -664,6 +667,135 @@ ostream& operator<<(ostream& ost, Furnizori f)
 }
 int Furnizori::nr_furnizori = 0;
 
+class Client
+{ private:
+	const int id;
+	string nume;
+	Casier casier;
+	int nrProduseCumparate;
+	string* produseCumparate;
+public:
+	Client() :id(10)
+	{
+		this->nume = "Ciprian";
+		this->nrProduseCumparate = 3;
+		this->produseCumparate = new string[this->nrProduseCumparate];
+		this->produseCumparate[0] = "Corn";
+		this->produseCumparate[1] = "Merdenea";
+		this->produseCumparate[2] = "Covrig";
+
+	}
+	Client(int nrProduseCumparate, string* produseCumparate) :id(15)
+	{
+		this->nume = "Luca";
+		this->nrProduseCumparate = nrProduseCumparate;
+		this->produseCumparate = new string[this->nrProduseCumparate];
+		for (int i = 0; i < this->nrProduseCumparate; i++)
+			this->produseCumparate[i] = produseCumparate[i];
+	}
+
+	Client(Client& c) :id(c.id)
+	{
+		this->nume = c.nume;
+		this->nrProduseCumparate = c.nrProduseCumparate;
+		this->produseCumparate = new string[this->nrProduseCumparate];
+		for (int i = 0; i < this->nrProduseCumparate; i++)
+			this->produseCumparate[i] = c.produseCumparate[i];
+		this->casier = c.casier;
+	}
+	~Client()
+	{
+		if (this->produseCumparate != NULL)
+			delete[]this->produseCumparate;
+	}
+	const Client& operator=(const Client& c)
+	{
+		if (this != &c)
+		{
+			this->nume = c.nume;
+			this->nrProduseCumparate = c.nrProduseCumparate;
+			this->casier = c.casier;
+			if (this->produseCumparate != NULL)
+				delete[]this->produseCumparate;
+			this->produseCumparate = new string[this->nrProduseCumparate];
+			for (int i = 0; i < this->nrProduseCumparate; i++)
+				this->produseCumparate[i] = c.produseCumparate[i];
+		}
+		return *this;
+	}
+
+	const int getId()
+	{
+		return this->id;
+	}
+	void setNume(string nume)
+	{
+		this->nume = nume;
+	}
+	string getNume()
+	{
+		return this->nume;
+	} 
+	void setNrProduseCumparate(int nrProduseCumparate,string* produseCumparate)
+	{
+		this->nrProduseCumparate = nrProduseCumparate;
+		if (this->produseCumparate != NULL)
+			delete[]this->produseCumparate;
+		this->produseCumparate = new string[this->nrProduseCumparate];
+		for (int i = 0; i < this->nrProduseCumparate; i++)
+			this->produseCumparate[i] = produseCumparate[i];
+	}
+	int getNrProduseCumparate()
+	{
+		return this->nrProduseCumparate;
+	}
+	string getProduseCumparate(int i)
+	{
+		return this->produseCumparate[i];
+	}
+
+	void setCasier(Casier c)
+	{
+		this->casier = c;
+	}
+	Casier getCasier()
+	{
+		return this->casier;
+	}
+	
+	const Client operator+(const Client& c)
+	{
+		Client aux = *this;
+		aux.nrProduseCumparate = this->nrProduseCumparate + c.nrProduseCumparate;
+		if (aux.produseCumparate != NULL)
+			delete[]aux.produseCumparate;
+		aux.produseCumparate = new string[aux.nrProduseCumparate];
+		for (int i = 0; i < this->nrProduseCumparate; i++)
+			aux.produseCumparate[i] = this->produseCumparate[i];
+		for (int i= this->nrProduseCumparate; i < aux.nrProduseCumparate; i++)
+			aux.produseCumparate[i] = c.produseCumparate[i- this->nrProduseCumparate];
+		return aux;
+
+	}
+
+	friend ostream& operator<<(ostream& out, Client& c)
+	{
+		out << "Clientul are id-ul " << c.id << ",numele " << c.nume << " ,iar numarul de produse cumparate este " << c.nrProduseCumparate << ".";
+			out << "Produsele cumparate sunt: "<<endl;
+			for (int i = 0; i < c.nrProduseCumparate; i++)
+				out << "Produsul " << i + 1 << " cumparat este: " << c.produseCumparate[i] << endl;
+			out << "Clientul a fost ajutat de casierul " << c.casier.getNume() << endl;
+			return out;
+	}
+
+	bool operator>(Client& c)
+	{
+		return this->nrProduseCumparate > c.nrProduseCumparate;
+	}
+
+
+
+};
 void Cauta_furnizor(Furnizori f, Patiserie p, string ingredient)
 {
 	int i,ok=0;
@@ -845,6 +977,32 @@ void main()
 	delete[]VectorFurnizori;
 	delete[]VectorCasieri;
 
+	Client client;
+	cout << client;
+	string* produsecumparate = new string[3]{ "corn","merdenea","franzela" };
+	Client client2(3, produsecumparate);
+	cout << client2;
+	Client client3 = client;
+	cout << client3;
+	client2 = client;
+	cout << client2;
+	client3 = client + client2;
+	cout << client3;
+	if (client3 > client2)
+		cout << "Clientul " << client3.getNume() << " a cumparat mai multe produse decat " << client2.getNume();
+	else
+		cout << "Clientul " << client2.getNume() << " a cumparat mai multe produse decat " << client3.getNume();
+	client.setNume("Ionel");
+	cout << client.getId()<<endl;
+	cout << client.getNume()<<endl;
+	client.setNrProduseCumparate(3, produsecumparate);
+	cout<<client.getNrProduseCumparate()<<endl;
+	cout << client.getProduseCumparate(2)<<endl;
+	client.setCasier(casier1);
+	cout<<client.getCasier();
+
+	delete[]produsecumparate;
 	
+
 
 }
