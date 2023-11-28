@@ -1,6 +1,7 @@
 
 // Domeniul ales este hypermarket
 #include<iostream>
+#include<fstream>
 using namespace std;
 
 class Furnizori;
@@ -174,12 +175,45 @@ public:
 	}
 	friend void Crestere_salariu(Casier& c, int procent,int vechime);
 	friend istream& operator>>(istream& is, Casier& c);
-	friend ostream& operator<<(ostream& ost, const Casier& c);
+	friend ostream& operator<<(ostream& ost,  const Casier& c);
 	friend Client;
+	friend ofstream& operator<<(ofstream& ost, const Casier& c);
+	friend ifstream& operator>>(ifstream& is, Casier& c);
+
+	void ScriereInFisierBinar(fstream& c)
+	{
+		int lungime = strlen(this->nume);
+		c.write((char*)&lungime, sizeof(int));
+		for (int i = 0; i < lungime; i++)
+			c.write((char*)&this->nume[i], sizeof(char));
+		c.write((char*)&this->varsta, sizeof(int));
+		c.write((char*)&this->salariu, sizeof(int));
+		c.write((char*)&this->vechime, sizeof(int));
+		c.write((char*)&this->full_time, sizeof(bool));
+
+	}
+
+	void CitireDinFisierBinar(fstream& c)
+	{
+		int lungime;
+		c.read((char*)&lungime, sizeof(int));
+		if (this->nume != NULL)
+			delete[]this->nume;
+		this->nume = new char[lungime +1];
+		for (int i = 0; i < lungime; i++)
+			c.read((char*)&this->nume[i], sizeof(char));
+		this->nume[lungime] = '\0';
+		c.read((char*)&this->varsta, sizeof(int));
+		c.read((char*)&this->salariu, sizeof(int));
+		c.read((char*)&this->vechime, sizeof(int));
+		c.read((char*)&this->full_time, sizeof(bool));
+
+	}
+
 };
 int Casier::procent_reducere = 10;
 
-istream& operator>>(istream& is, Casier& c)
+istream& operator>>(istream& is,  Casier& c)
 {
 	char nume[100];
 	cout << "Numele casierului este: ";
@@ -198,7 +232,21 @@ istream& operator>>(istream& is, Casier& c)
 	is >> c.full_time;
 	return is;
 }
-ostream& operator<<(ostream& ost, const Casier& c)
+ifstream& operator>>(ifstream& is, Casier& c)
+{
+	char nume[100];
+	is >> nume;
+	if (c.nume != NULL)
+		delete[]c.nume;
+	c.nume = new char[strlen(nume) + 1];
+	strcpy_s(c.nume, strlen(nume) + 1, nume);
+	is >> c.varsta;
+	is >> c.salariu;
+	is >> c.vechime;
+	is >> c.full_time;
+	return is;
+}
+ostream& operator<<(ostream& ost,  const Casier& c)
 {
 	ost << "Casierul are numele " << c.nume << ", are id-ul: " << c.id<<" ,procentul de reducere: "<<c.procent_reducere<<", varsta acestuia este de " << c.varsta << " ani, salariul este de " << c.salariu << " lei, iar vechimea angajatului este de : " << c.vechime << " ani.";
 	if (c.full_time == true)
@@ -207,6 +255,16 @@ ostream& operator<<(ostream& ost, const Casier& c)
 		ost << "Casierul este angajat part-time";
 	return ost;
 }
+ 
+
+ofstream& operator<<(ofstream& ost, const Casier& c)
+{
+	ost<< c.nume<<endl<<c.varsta <<endl << c.salariu << endl << c.vechime << endl;
+	ost << c.full_time;
+	return ost;
+}
+
+
 void Crestere_salariu(Casier& c, int procent,int vechime)
 {
 	int salariu_vechi=c.salariu;
@@ -394,6 +452,32 @@ public:
 	friend void Cauta_furnizor(Furnizori f,Patiserie p, string ingredient);
 	friend istream& operator>>(istream& ist, Patiserie& p);
 	friend ostream& operator<<(ostream& os, Patiserie& p);
+	friend ifstream& operator>>(ifstream& ist, Patiserie& p)
+	{
+		
+		ist >> p.nume;
+		ist >> p.pret;
+		ist >> p.greutate;
+		ist >> p.nr_ingrediente;
+		int i;
+		if (p.ingrediente != NULL)
+			delete[]p.ingrediente;
+		p.ingrediente = new string[p.nr_ingrediente];
+		for (i = 0; i < p.nr_ingrediente; i++)
+		{
+			ist >> p.ingrediente[i];
+		}
+		return ist;
+	}
+	friend ofstream& operator<<(ofstream& os, Patiserie& p)
+	{
+		os << p.nume << endl << p.pret << endl << p.greutate << endl << p.nr_ingrediente << endl;
+		for (int i = 0; i < p.nr_ingrediente; i++)
+		{
+			os <<p.ingrediente[i] << endl;
+		}
+		return os;
+	}
 };
 istream& operator>>(istream& ist, Patiserie& p)
 {
@@ -417,6 +501,7 @@ istream& operator>>(istream& ist, Patiserie& p)
 	return ist;
 }
 
+
 ostream& operator<<(ostream& os, Patiserie& p)
 {
 	os << "Numele produsului este: " << p.nume << " ,pretul acestuia este: " << p.pret << " lei, greutatea este de " << p.greutate << " kg, numarul de ingrediente este: " << p.nr_ingrediente<<" ,id-ul este "<<p.cod_produs<<" iar tva-ul "<<p.tva<<"."<<endl;
@@ -426,6 +511,8 @@ ostream& operator<<(ostream& os, Patiserie& p)
 	}
 	return os;
 }
+
+
 
 int Patiserie::tva = 9;
 
@@ -625,6 +712,39 @@ public:
 	friend void Cauta_furnizor(Furnizori f, Patiserie p, string ingredient);
 	friend ostream& operator<<(ostream& ost, Furnizori f);
 	friend istream& operator>>(istream& ist, Furnizori& f);
+	friend ifstream& operator>>(ifstream& ist, Furnizori& f)
+	{
+		char oras[100];
+		ist >> f.nume;
+		ist >> oras;
+		if (f.oras != NULL)
+			delete[]f.oras;
+		f.oras = new char[strlen(oras) + 1];
+		strcpy_s(f.oras, strlen(oras) + 1, oras);
+		ist >> f.nr_produse;
+		if (f.produs != NULL)
+			delete[]f.produs;
+		f.produs = new string[f.nr_produse];
+		for (int i = 0; i < f.nr_produse; i++)
+		{
+			ist >> f.produs[i];
+		}
+		ist >> f.durata_contract;
+		return ist;
+
+
+	}
+	friend ofstream& operator<<(ofstream& ost, Furnizori f)
+	{
+		ost <<f.nume <<endl << f.oras<<endl;
+
+		ost << f.nr_produse<<endl;
+		for (int i = 0; i < f.nr_produse; i++)
+			ost <<f.produs[i]<<endl;
+		ost <<f.durata_contract<< endl;
+		return ost;
+
+	}
 
 };
 istream& operator>>(istream& ist, Furnizori& f)
@@ -654,6 +774,7 @@ istream& operator>>(istream& ist, Furnizori& f)
 
 
 }
+
 ostream& operator<<(ostream& ost, Furnizori f)
 {
 	ost << "Numarul de furnizori este: " << f.nr_furnizori << ", id-ul furnizorului este: " << f.id << ", numele furnizorului este: " << f.nume << " ,iar numele orasului este: " << f.oras;
@@ -787,6 +908,66 @@ public:
 			out << "Clientul a fost ajutat de casierul " << c.casier.getNume() << endl;
 			return out;
 	}
+	void ScriereInFisierBinar(fstream& cl)
+	{
+		const char* nume = this->nume.c_str();
+		int lungimeNume = strlen(nume);
+		cl.write((char*)&lungimeNume, sizeof(int));
+		for (int i = 0; i < lungimeNume; i++)
+			cl.write((char*)&nume[i], sizeof(char));
+		cl.write((char*)&this->nrProduseCumparate, sizeof(int));
+		const char** vectorProduse = new const char* [this->nrProduseCumparate];
+		int* lungimeProduse = new int[this->nrProduseCumparate];
+		for (int i = 0; i < this->nrProduseCumparate; i++)
+		{
+			vectorProduse[i] = this->produseCumparate[i].c_str();
+			lungimeProduse[i] = this->produseCumparate[i].length();
+		}
+		for (int i = 0; i < this->nrProduseCumparate; i++)
+		{
+			cl.write((char*)&lungimeProduse[i], sizeof(int));
+			for (int j = 0; j < lungimeProduse[i]; j++)
+				cl.write((char*)&vectorProduse[i][j], sizeof(char));
+		}
+		int lungime=strlen(this->casier.nume);
+		cl.write((char*)&lungime, sizeof(int));
+		for (int i = 0; i < lungime; i++)
+			cl.write((char*)&this->casier.nume[i], sizeof(char));
+	}
+	void CitireDinFisierBinar(fstream& cl)
+	{
+		int lungimeNume;
+		cl.read((char*)&lungimeNume, sizeof(int));
+		char* nume = new char[lungimeNume + 1];
+		for (int i = 0; i < lungimeNume; i++)
+			cl.read((char*)&nume[i], sizeof(char));
+		nume[lungimeNume] = '\0';
+		this->nume.assign(nume, lungimeNume+1);
+		cl.read((char*)&this->nrProduseCumparate, sizeof(int));
+		if (this->produseCumparate != NULL)
+			delete[]this->produseCumparate;
+		this->produseCumparate = new string[this->nrProduseCumparate];
+		char** vectorProduse = new char* [this->nrProduseCumparate];
+		int* lungimeProduse = new int[this->nrProduseCumparate];
+		for (int i = 0; i < this->nrProduseCumparate; i++)
+		{
+			cl.read((char*)&lungimeProduse[i], sizeof(int));
+			vectorProduse[i] = new char[lungimeProduse[i] + 1];
+			for (int j = 0; j < lungimeProduse[i]; j++)
+				cl.read((char*)&vectorProduse[i][j], sizeof(char));
+			vectorProduse[i][lungimeProduse[i]] = '\0';
+		}
+		for (int i = 0; i < this->nrProduseCumparate; i++)
+			this->produseCumparate[i].assign(vectorProduse[i], lungimeProduse[i]);
+		int lungime;
+		cl.read((char*)&lungime, sizeof(int));
+		if (this->casier.nume != NULL)
+			delete[]this->casier.nume;
+		this->casier.nume = new char[lungime + 1];
+		for (int i = 0; i < lungime; i++)
+			cl.read((char*)&this->casier.nume[i], sizeof(char));
+		this->casier.nume[lungime] = '\0';
+	}
 
 	bool operator>(Client& c)
 	{
@@ -823,32 +1004,32 @@ void Cauta_furnizor(Furnizori f, Patiserie p, string ingredient)
 
 void main()
 {
-	Casier casier1;
+	/*Casier casier1;
 	casier1.afisare();
 	Casier casier2(23, 2320);
 	casier2.afisare();
 	char* nume = new char[strlen("Ioana") + 1];
-	strcpy_s(nume, strlen("Ioana") + 1, "Ioana");
-	Casier casier3(nume, 2400, 3);
+	strcpy_s(nume, strlen("Ioana") + 1, "Ioana");*/
+	/*Casier casier3(nume, 2400, 3);
 	casier3.afisare();
-	delete[]nume;
+	delete[]nume;*/
 
-	Patiserie patiserie1;
+	/*Patiserie patiserie1;
 	patiserie1.afisare();
 	Patiserie patiserie2("Covrig", 3.2, 0.15);
 	patiserie2.afisare();
 	string* ingrediente = new string[2];
 	ingrediente[0] = "Sare";
-	ingrediente[1] = "Unt";
-	Patiserie patiserie3(2, ingrediente);
+	ingrediente[1] = "Unt";*/
+	/*Patiserie patiserie3(2, ingrediente);
 	patiserie3.afisare();
-	delete[]ingrediente;
+	delete[]ingrediente;*/
 
-	Furnizori furnizor1;
+	/*Furnizori furnizor1;
 	furnizor1.afisare();
 	Furnizori furnizor2("Pano", 5);
-	furnizor2.afisare();
-	string* produs=new string[4];
+	furnizor2.afisare();*/
+	/*string* produs = new string[4];
 	produs[0] = "mere";
 	produs[1] = "unt";
 	produs[2] = "prune";
@@ -1002,7 +1183,54 @@ void main()
 	cout<<client.getCasier();
 
 	delete[]produsecumparate;
+
+	*/
+
+	/*ofstream c1("Casier.txt", ios::out);
+	c1 << casier1;
+	c1.close();
+	ifstream c2("Casier.txt", ios::in);
+	c2 >> casier2;
+	c2.close();
+	cout << casier2;*/
 	
+	/*ofstream p1("Patiserie.txt", ios::out);
+	p1 << patiserie1;
+	p1.close();*/
+	/*ifstream p2("Patiserie.txt", ios::in);
+	p2 >> patiserie2;
+	cout << patiserie2;
+	p2.close();*/
+	
+	/*ofstream f1("Furnizor.txt", ios::out);
+	f1 << furnizor1;
+	f1.close();
+	ifstream f2("Furnizor.txt", ios::in);
+	f2 >> furnizor2;
+	cout << furnizor2;
+	f2.close();
+
+	*/
+
+	/*fstream c3("Casier_binar.dat", ios::out | ios::binary);
+	casier1.ScriereInFisierBinar(c3);
+	c3.close();
+	fstream c4("Casier_binar.dat", ios::in | ios::binary);
+	casier2.CitireDinFisierBinar(c4);
+	c4.close();
+	cout << casier2;*/ 
+
+	Client client;
+	cout << client;
+	string* produsecumparate = new string[3]{ "corn","merdenea","franzela" };
+	Client client2(3, produsecumparate);
+	fstream cl1("Client_binar.dat", ios::out | ios::binary);
+	client.ScriereInFisierBinar(cl1);
+	cl1.close();
+	fstream cl2("Client_binar.dat", ios::in | ios::binary);
+	client2.CitireDinFisierBinar(cl2);
+	cout << client2;
+	cl2.close();
 
 
 }
