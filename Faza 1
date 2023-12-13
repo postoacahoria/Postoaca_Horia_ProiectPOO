@@ -4,10 +4,26 @@
 #include<fstream>
 using namespace std;
 
+class ClientAbstract;
+
+class AfisarePeEcran {
+public:
+	virtual void afisarePeEcran() = 0;
+};
+
+class Angajat {
+public:
+	virtual char* preiaNume() = 0;
+	virtual void modificaNume(char* nume) = 0;
+	friend ClientAbstract;
+	friend ostream& operator<<(ostream& out, ClientAbstract& c);
+};
+
+
 class Furnizori;
 class Client;
 
-class Casier
+class Casier : public AfisarePeEcran, public Angajat
 {
 private:
 	static int procent_reducere;
@@ -210,6 +226,41 @@ public:
 
 	}
 
+	void afisarePeEcran() {
+		cout << "Casierul are numele " << nume << " , are id-ul:" << id << " ,varsta de " << varsta << " ani, salariul de " << salariu << " lei si o vechime de " << vechime << " ani. Are un procent de reducere de " << procent_reducere << "% .";
+		if (full_time == true)
+			cout << " Acesta este angajat full-time" << endl;
+		else
+			cout << " Acesta este angajat part-time" << endl;
+	}
+
+	char* preiaNume() {
+		return this->nume;
+	}
+
+	void modificaNume(char* nume) {
+		if (this->nume != NULL)
+			delete[]this->nume;
+		this->nume = new char[strlen(nume) + 1];
+		strcpy_s(this->nume, strlen(nume) + 1, nume);
+	}
+
+	/*Casier* egaleazaAngajati(const Casier& c) {
+		if (this != &c)
+		{
+			if (this->nume != NULL)
+				delete[]this->nume;
+			this->nume = new char[strlen(c.nume) + 1];
+			strcpy_s(this->nume, strlen(c.nume) + 1, c.nume);
+			this->varsta = c.varsta;
+			this->salariu = c.salariu;
+			this->vechime = c.vechime;
+			this->full_time = c.full_time;
+		}
+		return this;
+	}*/
+
+
 };
 int Casier::procent_reducere = 10;
 
@@ -368,7 +419,7 @@ ostream& operator<<(ostream& ost, CasierSef& c)
 }
 
 
-class Patiserie
+class Patiserie : public AfisarePeEcran
 {
 private:
 	static int tva;
@@ -573,6 +624,14 @@ public:
 		}
 		return os;
 	}
+
+	void afisarePeEcran() {
+		int i;
+		cout << "Produsul de patiserie este " << nume << " ,are codul " << cod_produs << " ,are un pret de " << pret << " lei " << ",o greutate de " << greutate << " kg " << " si " << nr_ingrediente << " ingrediente. Ingredientele sunt: ";
+		for (i = 0; i < nr_ingrediente; i++)
+			cout << ingrediente[i] << " ";
+		cout << ".Tva-ul aplicat pentru acest produs este de: " << tva << "%." << endl;
+	}
 };
 
 istream& operator>>(istream& ist, Patiserie& p)
@@ -708,7 +767,7 @@ public:
 	}
 };
 
-class Furnizori
+class Furnizori : public AfisarePeEcran
 {
 private:
 	static int nr_furnizori;
@@ -936,6 +995,12 @@ public:
 
 	}
 
+	void afisarePeEcran() {
+		cout << "Furnizorul " << nume << " are id-ul : " << id << " , este din orasul " << oras << ", livreaza " << nr_produse << " produse si are un contract cu durata de " << durata_contract << " ani. Produsele furnizate sunt:";
+		for (int i = 0; i < nr_produse; i++)
+			cout << produs[i] << " ";
+		cout << ".Numarul total de furnizori este: " << nr_furnizori << endl;
+	}
 };
 istream& operator>>(istream& ist, Furnizori& f)
 {
@@ -978,7 +1043,7 @@ ostream& operator<<(ostream& ost, Furnizori f)
 }
 int Furnizori::nr_furnizori = 0;
 
-class Client
+class Client : public AfisarePeEcran
 { private:
 	const int id;
 	string nume;
@@ -1164,9 +1229,208 @@ public:
 		return this->nrProduseCumparate > c.nrProduseCumparate;
 	}
 
-
+	void afisarePeEcran() {
+		cout << "Clientul are id-ul " << this->id << ",numele " << this->nume << " ,iar numarul de produse cumparate este " << this->nrProduseCumparate << ".";
+		cout << "Produsele cumparate sunt: " << endl;
+		for (int i = 0; i < this->nrProduseCumparate; i++)
+			cout << "Produsul " << i + 1 << " cumparat este: " << this->produseCumparate[i] << endl;
+		cout << "Clientul a fost ajutat de casierul " << this->casier.getNume() << endl;
+	}
 
 };
+
+
+class ClientAbstract : public AfisarePeEcran
+{
+private:
+	const int id;
+	string nume;
+	Angajat* angajat;
+	int nrProduseCumparate;
+	string* produseCumparate;
+public:
+	ClientAbstract() :id(10)
+	{
+		this->nume = "Ciprian";
+		this->nrProduseCumparate = 3;
+		this->produseCumparate = new string[this->nrProduseCumparate];
+		this->produseCumparate[0] = "Corn";
+		this->produseCumparate[1] = "Merdenea";
+		this->produseCumparate[2] = "Covrig";
+		this->angajat = new Casier();
+	}
+	ClientAbstract(int nrProduseCumparate, string* produseCumparate) :id(15)
+	{
+		this->nume = "Luca";
+		this->nrProduseCumparate = nrProduseCumparate;
+		this->produseCumparate = new string[this->nrProduseCumparate];
+		for (int i = 0; i < this->nrProduseCumparate; i++)
+			this->produseCumparate[i] = produseCumparate[i];
+		this->angajat = new Casier();
+	}
+
+	ClientAbstract(ClientAbstract& c) :id(c.id)
+	{
+		this->nume = c.nume;
+		this->nrProduseCumparate = c.nrProduseCumparate;
+		this->produseCumparate = new string[this->nrProduseCumparate];
+		for (int i = 0; i < this->nrProduseCumparate; i++)
+			this->produseCumparate[i] = c.produseCumparate[i];
+	}
+	~ClientAbstract()
+	{
+		if (this->produseCumparate != NULL)
+			delete[]this->produseCumparate;
+	}
+	const ClientAbstract& operator=(const ClientAbstract& c)
+	{
+		if (this != &c)
+		{
+			this->nume = c.nume;
+			this->nrProduseCumparate = c.nrProduseCumparate;
+			if (this->produseCumparate != NULL)
+				delete[]this->produseCumparate;
+			this->produseCumparate = new string[this->nrProduseCumparate];
+			for (int i = 0; i < this->nrProduseCumparate; i++)
+				this->produseCumparate[i] = c.produseCumparate[i];
+		}
+		return *this;
+	}
+
+	const int getId()
+	{
+		return this->id;
+	}
+	void setNume(string nume)
+	{
+		this->nume = nume;
+	}
+	string getNume()
+	{
+		return this->nume;
+	}
+	void setNrProduseCumparate(int nrProduseCumparate, string* produseCumparate)
+	{
+		this->nrProduseCumparate = nrProduseCumparate;
+		if (this->produseCumparate != NULL)
+			delete[]this->produseCumparate;
+		this->produseCumparate = new string[this->nrProduseCumparate];
+		for (int i = 0; i < this->nrProduseCumparate; i++)
+			this->produseCumparate[i] = produseCumparate[i];
+	}
+	int getNrProduseCumparate()
+	{
+		return this->nrProduseCumparate;
+	}
+	string getProduseCumparate(int i)
+	{
+		return this->produseCumparate[i];
+	}
+
+
+	const ClientAbstract operator+(const ClientAbstract& c)
+	{
+		ClientAbstract aux = *this;
+		aux.nrProduseCumparate = this->nrProduseCumparate + c.nrProduseCumparate;
+		if (aux.produseCumparate != NULL)
+			delete[]aux.produseCumparate;
+		aux.produseCumparate = new string[aux.nrProduseCumparate];
+		for (int i = 0; i < this->nrProduseCumparate; i++)
+			aux.produseCumparate[i] = this->produseCumparate[i];
+		for (int i = this->nrProduseCumparate; i < aux.nrProduseCumparate; i++)
+			aux.produseCumparate[i] = c.produseCumparate[i - this->nrProduseCumparate];
+		return aux;
+
+	}
+
+	friend ostream& operator<<(ostream& out, ClientAbstract& c)
+	{
+		out << "Clientul are id-ul " << c.id << ",numele " << c.nume << " ,iar numarul de produse cumparate este " << c.nrProduseCumparate << ".";
+		out << "Produsele cumparate sunt: " << endl;
+		for (int i = 0; i < c.nrProduseCumparate; i++)
+			out << "Produsul " << i + 1 << " cumparat este: " << c.produseCumparate[i] << endl;
+		out << "Clientul a fost ajutat de casierul " << c.angajat->preiaNume() << endl;
+		return out;
+	}
+
+	void ScriereInFisierBinar(fstream& cl)
+	{
+		const char* nume = this->nume.c_str();
+		int lungimeNume = strlen(nume);
+		cl.write((char*)&lungimeNume, sizeof(int));
+		for (int i = 0; i < lungimeNume; i++)
+			cl.write((char*)&nume[i], sizeof(char));
+		cl.write((char*)&this->nrProduseCumparate, sizeof(int));
+		const char** vectorProduse = new const char* [this->nrProduseCumparate];
+		int* lungimeProduse = new int[this->nrProduseCumparate];
+		for (int i = 0; i < this->nrProduseCumparate; i++)
+		{
+			vectorProduse[i] = this->produseCumparate[i].c_str();
+			lungimeProduse[i] = this->produseCumparate[i].length();
+		}
+		for (int i = 0; i < this->nrProduseCumparate; i++)
+		{
+			cl.write((char*)&lungimeProduse[i], sizeof(int));
+			for (int j = 0; j < lungimeProduse[i]; j++)
+				cl.write((char*)&vectorProduse[i][j], sizeof(char));
+		}
+		char* numeCasier = this->angajat->preiaNume();
+		int lungime = strlen(numeCasier);
+		cl.write((char*)&lungime, sizeof(int));
+		for (int i = 0; i < lungime; i++)
+			cl.write((char*)&numeCasier[i], sizeof(char));
+	}
+	void CitireDinFisierBinar(fstream& cl)
+	{
+		int lungimeNume;
+		cl.read((char*)&lungimeNume, sizeof(int));
+		char* nume = new char[lungimeNume + 1];
+		for (int i = 0; i < lungimeNume; i++)
+			cl.read((char*)&nume[i], sizeof(char));
+		nume[lungimeNume] = '\0';
+		this->nume.assign(nume, lungimeNume + 1);
+		cl.read((char*)&this->nrProduseCumparate, sizeof(int));
+		if (this->produseCumparate != NULL)
+			delete[]this->produseCumparate;
+		this->produseCumparate = new string[this->nrProduseCumparate];
+		char** vectorProduse = new char* [this->nrProduseCumparate];
+		int* lungimeProduse = new int[this->nrProduseCumparate];
+		for (int i = 0; i < this->nrProduseCumparate; i++)
+		{
+			cl.read((char*)&lungimeProduse[i], sizeof(int));
+			vectorProduse[i] = new char[lungimeProduse[i] + 1];
+			for (int j = 0; j < lungimeProduse[i]; j++)
+				cl.read((char*)&vectorProduse[i][j], sizeof(char));
+			vectorProduse[i][lungimeProduse[i]] = '\0';
+		}
+		for (int i = 0; i < this->nrProduseCumparate; i++)
+			this->produseCumparate[i].assign(vectorProduse[i], lungimeProduse[i]);
+		int lungime;
+		cl.read((char*)&lungime, sizeof(int));
+		char* numeCasier;
+		numeCasier = new char[lungime + 1];
+		for (int i = 0; i < lungime; i++)
+			cl.read((char*)&numeCasier[i], sizeof(char));
+		numeCasier[lungime] = '\0';
+		this->angajat->modificaNume(numeCasier);
+	}
+
+	bool operator>(ClientAbstract& c)
+	{
+		return this->nrProduseCumparate > c.nrProduseCumparate;
+	}
+
+	void afisarePeEcran() {
+		cout << "Clientul are id-ul " << this->id << ",numele " << this->nume << " ,iar numarul de produse cumparate este " << this->nrProduseCumparate << ".";
+		cout << "Produsele cumparate sunt: " << endl;
+		for (int i = 0; i < this->nrProduseCumparate; i++)
+			cout << "Produsul " << i + 1 << " cumparat este: " << this->produseCumparate[i] << endl;
+		cout << "Clientul a fost ajutat de casierul " << this->angajat->preiaNume() << endl;
+	}
+
+};
+
+
 void Cauta_furnizor(Furnizori f, Patiserie p, string ingredient)
 {
 	int i,ok=0;
@@ -1328,7 +1592,7 @@ void main()
 	for (int i = 0; i < 3; i++)
 		for (int j = 0; j < 2; j++)
 			cout << MatricePatiserie[i][j];
-	
+
 	Furnizori* VectorFurnizori = new Furnizori[3];
 	for (int i = 0; i < 3; i++)
 		cin >> VectorFurnizori[i];
@@ -1374,7 +1638,7 @@ void main()
 
 	delete[]produsecumparate;
 
-	
+
 
 	ofstream c1("Casier.txt", ios::out);
 	c1 << casier1;
@@ -1383,7 +1647,7 @@ void main()
 	c2 >> casier2;
 	c2.close();
 	cout << casier2;
-	
+
 	ofstream p1("Patiserie.txt", ios::out);
 	p1 << patiserie1;
 	p1.close();
@@ -1391,7 +1655,7 @@ void main()
 	p2 >> patiserie2;
 	cout << patiserie2;
 	p2.close();
-	
+
 	ofstream f1("Furnizor.txt", ios::out);
 	f1 << furnizor1;
 	f1.close();
@@ -1400,7 +1664,7 @@ void main()
 	cout << furnizor2;
 	f2.close();
 
-	
+
 
 	fstream c3("Casier_binar.dat", ios::out | ios::binary);
 	casier1.ScriereInFisierBinar(c3);
@@ -1408,7 +1672,7 @@ void main()
 	fstream c4("Casier_binar.dat", ios::in | ios::binary);
 	casier2.CitireDinFisierBinar(c4);
 	c4.close();
-	cout << casier2; 
+	cout << casier2;
 
 	Client client4;
 	cout << client4;
@@ -1435,22 +1699,48 @@ void main()
 	cout << cs1.getNrBonusuri() << endl;
 	cout << cs1.getBonusuri(2) << endl;*/
 
-	
-PatiseriePeComanda pc1;
-cout << pc1 << endl;
-//PatiseriePeComanda pc2 = pc1;
-//cout << pc2 << endl;
-//char* data_plasare = new char[strlen("15-03-2023") + 1];
-//strcpy_s(data_plasare, strlen("15-03-2023")+1, "15-03-2023");
-//char* data_livrare = new char[strlen("25-03-2023") + 1];
-//strcpy_s(data_livrare, strlen("25-03-2023") + 1, "25-03-2023");
-//
-//PatiseriePeComanda pc3(data_plasare, data_livrare, "Ion", "Paine", 6.2, 0.4);
-//cout << pc3 << endl;;
-//pc3 = pc1;
-//cout << pc3;
-Patiserie patiserie6;
-patiserie6 = pc1;
-cout << patiserie6;
+
+	//PatiseriePeComanda pc1;
+	//cout << pc1 << endl;
+	//PatiseriePeComanda pc2 = pc1;
+	//cout << pc2 << endl;
+	//char* data_plasare = new char[strlen("15-03-2023") + 1];
+	//strcpy_s(data_plasare, strlen("15-03-2023")+1, "15-03-2023");
+	//char* data_livrare = new char[strlen("25-03-2023") + 1];
+	//strcpy_s(data_livrare, strlen("25-03-2023") + 1, "25-03-2023");
+	//
+	//PatiseriePeComanda pc3(data_plasare, data_livrare, "Ion", "Paine", 6.2, 0.4);
+	//cout << pc3 << endl;;
+	//pc3 = pc1;
+	//cout << pc3;
+	//Patiserie patiserie6;
+	//patiserie6 = pc1;
+	//cout << patiserie6;
+
+	/*ClientAbstract clientAbstract;*/
+	//cout << clientAbstract;
+	//clientAbstract.afisarePeEcran();
+	/*fstream cla1("ClientAbstract_binar.dat", ios::out | ios::binary);
+	clientAbstract.ScriereInFisierBinar(cla1);
+	cla1.close();
+	fstream cla2("ClientAbstract_binar.dat", ios::in | ios::binary);
+	clientAbstract.CitireDinFisierBinar(cla2);
+	cout << clientAbstract;
+	cla2.close();*/
+
+	//AfisarePeEcran** afisare = new AfisarePeEcran * [10];
+	//afisare[0] = new Patiserie();
+	//afisare[1] = new Furnizori(); 
+	//afisare[2] = new Client();
+	//afisare[3] = new Furnizori();
+	//afisare[4] = new Patiserie();
+	//afisare[5] = new ClientAbstract();
+	//afisare[6] = new Patiserie();
+	//afisare[7] = new Furnizori();
+	//afisare[8] = new Patiserie();
+	//afisare[9] = new Client();
+	//for (int i = 0; i < 10; i++)
+	//	afisare[i]->afisarePeEcran();
+
 
 }
